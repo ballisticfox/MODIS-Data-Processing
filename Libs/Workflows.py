@@ -1,5 +1,6 @@
 from Libs.HEG import *
 from Libs.Processes import *
+import threading
 
 class Workflows:
     
@@ -14,43 +15,86 @@ class Workflows:
         ProductionDate = hdfData[3]
         fileExtension = hdfData[4]
         
-        print("Processing Band 1")
+        # Level 0
+        print("Processing Grids")
         HEG.GenerateGrid(f"{DataSet}.{AquisitionDate}.Band1", f"{DataSet}.{AquisitionDate}.{ProductVersion}.{ProductionDate}", f"{DataSet}", "Coarse Resolution Surface Reflectance Band 1", 1, f"{DataSet}.{AquisitionDate}_Band1")
-        HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.Band1")
-        
-        print("Processing Band 3")
         HEG.GenerateGrid(f"{DataSet}.{AquisitionDate}.Band3", f"{DataSet}.{AquisitionDate}.{ProductVersion}.{ProductionDate}", f"{DataSet}", "Coarse Resolution Surface Reflectance Band 3", 1, f"{DataSet}.{AquisitionDate}_Band3")
-        HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.Band3")
-        
-        print("Processing Band 4")
         HEG.GenerateGrid(f"{DataSet}.{AquisitionDate}.Band4", f"{DataSet}.{AquisitionDate}.{ProductVersion}.{ProductionDate}", f"{DataSet}", "Coarse Resolution Surface Reflectance Band 4", 1, f"{DataSet}.{AquisitionDate}_Band4")
-        HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.Band4")
-        
-        print("Processing State QA")
         HEG.GenerateGrid(f"{DataSet}.{AquisitionDate}.StateQA", f"{DataSet}.{AquisitionDate}.{ProductVersion}.{ProductionDate}", f"{DataSet}", "Coarse Resolution State QA", 1, f"{DataSet}.{AquisitionDate}_StateQA")
-        HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.StateQA")
-        
-        print("Processing Atmosphere CM")
         HEG.GenerateGrid(f"{DataSet}.{AquisitionDate}.CM", f"{DataSet}.{AquisitionDate}.{ProductVersion}.{ProductionDate}", f"{DataSet}", "Coarse Resolution Internal CM", 1, f"{DataSet}.{AquisitionDate}_CM")
-        HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.CM")
         
-        print("Correcting Bands")
-        Processes.INTtoUNIT(f"{DataSet}.{AquisitionDate}_Band1", 2, 2.2, f"{DataSet}.{AquisitionDate}_Band1-Corrected")
-        Processes.INTtoUNIT(f"{DataSet}.{AquisitionDate}_Band3", 2, 2.2, f"{DataSet}.{AquisitionDate}_Band3-Corrected")
-        Processes.INTtoUNIT(f"{DataSet}.{AquisitionDate}_Band4", 2, 2.2, f"{DataSet}.{AquisitionDate}_Band4-Corrected")
+        
+        
+        # Level 1
+        # HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.Band1")
+        t1 = threading.Thread(target=HEG.GenerateGeoTiff, args=(f"{DataSet}.{AquisitionDate}.Band1",))
+        # HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.Band3")
+        t2 = threading.Thread(target=HEG.GenerateGeoTiff, args=(f"{DataSet}.{AquisitionDate}.Band3",))
+        # HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.Band4")
+        t3 = threading.Thread(target=HEG.GenerateGeoTiff, args=(f"{DataSet}.{AquisitionDate}.Band4",))
+        
+        #HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.StateQA")
+        t4 = threading.Thread(target=HEG.GenerateGeoTiff, args=(f"{DataSet}.{AquisitionDate}.StateQA",))
+        #HEG.GenerateGeoTiff(f"{DataSet}.{AquisitionDate}.CM")
+        t5 = threading.Thread(target=HEG.GenerateGeoTiff, args=(f"{DataSet}.{AquisitionDate}.CM",))
+        
+        t1.start()
+        t2.start()
+        t3.start()
+        t4.start()
+        t5.start()
+        
+        t1.join()
+        t2.join()
+        t3.join()
+        t4.join()
+        t5.join()
+        
+        # Level 2
+        # print("Correcting Bands")
+        # Processes.INTtoUNIT(f"{DataSet}.{AquisitionDate}_Band1", 2, 2.2, f"{DataSet}.{AquisitionDate}_Band1-Corrected")
+        # Processes.INTtoUNIT(f"{DataSet}.{AquisitionDate}_Band3", 2, 2.2, f"{DataSet}.{AquisitionDate}_Band3-Corrected")
+        # Processes.INTtoUNIT(f"{DataSet}.{AquisitionDate}_Band4", 2, 2.2, f"{DataSet}.{AquisitionDate}_Band4-Corrected")
+        t6 = threading.Thread(target=Processes.INTtoUNIT, args=(f"{DataSet}.{AquisitionDate}_Band1", 2, 2.2, f"{DataSet}.{AquisitionDate}_Band1-Corrected",))
+        t7 = threading.Thread(target=Processes.INTtoUNIT, args=(f"{DataSet}.{AquisitionDate}_Band3", 2, 2.2, f"{DataSet}.{AquisitionDate}_Band3-Corrected",))
+        t8 = threading.Thread(target=Processes.INTtoUNIT, args=(f"{DataSet}.{AquisitionDate}_Band4", 2, 2.2, f"{DataSet}.{AquisitionDate}_Band4-Corrected",))
+        
+        t6.start()
+        t7.start()
+        t8.start()
+        
+        t6.join()
+        t7.join()
+        t8.join()
         
         print("Composing Color")
         Processes.RGBCompose(f"{DataSet}.{AquisitionDate}_Band1-Corrected", f"{DataSet}.{AquisitionDate}_Band4-Corrected", f"{DataSet}.{AquisitionDate}_Band3-Corrected", f"{DataSet}.{AquisitionDate}_RGB")
         
-        print("Generating Data Mask")
-        Processes.GenerateDataMask(f"{DataSet}.{AquisitionDate}_StateQA", f"{DataSet}.{AquisitionDate}_DataMask")
         
-        print("Generating No Data Mask")
-        Processes.GenerateNoDataMask(f"{DataSet}.{AquisitionDate}_RGB", f"{DataSet}.{AquisitionDate}_NoData")
+        # Level 3
         
-        print("Generating Sun Glint Mask")
-        Processes.GenerateSunGlintMask(f"{DataSet}.{AquisitionDate}_CM", f"{DataSet}.{AquisitionDate}_GlintMask")
+        # print("Generating Data Mask")
+        # Processes.GenerateDataMask(f"{DataSet}.{AquisitionDate}_StateQA", f"{DataSet}.{AquisitionDate}_DataMask")
+        t9 = threading.Thread(target=Processes.GenerateDataMask, args=(f"{DataSet}.{AquisitionDate}_StateQA", f"{DataSet}.{AquisitionDate}_DataMask",))
         
+        # print("Generating No Data Mask")
+        # Processes.GenerateNoDataMask(f"{DataSet}.{AquisitionDate}_RGB", f"{DataSet}.{AquisitionDate}_NoData")
+        t10 = threading.Thread(target=Processes.GenerateNoDataMask, args=(f"{DataSet}.{AquisitionDate}_RGB", f"{DataSet}.{AquisitionDate}_NoData",))
+        
+        # print("Generating Sun Glint Mask")
+        # Processes.GenerateSunGlintMask(f"{DataSet}.{AquisitionDate}_CM", f"{DataSet}.{AquisitionDate}_GlintMask")
+        t11 = threading.Thread(target=Processes.GenerateSunGlintMask, args=(f"{DataSet}.{AquisitionDate}_CM", f"{DataSet}.{AquisitionDate}_GlintMask",))
+        
+        t9.start()
+        t10.start()
+        t11.start()
+        
+        t9.join()
+        t10.join()
+        t11.join()
+        
+        
+        # Level 4
         print("Combining Masks")
         Processes.CombineMasks(f"{DataSet}.{AquisitionDate}_DataMask", f"{DataSet}.{AquisitionDate}_NoData",f"{DataSet}.{AquisitionDate}_Mask")
         Processes.CombineMasks(f"{DataSet}.{AquisitionDate}_GlintMask", f"{DataSet}.{AquisitionDate}_Mask",f"{DataSet}.{AquisitionDate}_Mask")
