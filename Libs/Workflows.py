@@ -7,6 +7,8 @@ class Workflows:
 
     '''
     
+    
+    
     @staticmethod
     def CMG_Workflow(hdfFile: str, removeProcessFiles: bool) -> None:
         dir_path = Util.GetDataDirectory()
@@ -136,6 +138,9 @@ class Workflows:
             
             os.remove(f"{dir_path}{DataSet}.{AquisitionDate}_RGB.tif")
     '''
+    
+    # MOD09/MYD09 Workflow, currently WIP
+    # TODO: QA Mask
     @staticmethod    
     def MOD09(DataSetName: str, hdfFile: str, removeProcessFiles: bool) -> None:
         dir_path = Util.GetDataDirectory()

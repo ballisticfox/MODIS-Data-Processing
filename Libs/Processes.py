@@ -3,6 +3,8 @@ import time
 from Libs.Util import *
 
 class Processes:
+    
+    # Converts from signed integer format to unsigned with additional brightness and gamma options
     @staticmethod
     def INTtoUNIT(fileName: str, multiplier: int, gamma: float, exportName: str) -> None:
         dir_path = Util.GetDataDirectory()
@@ -16,6 +18,7 @@ class Processes:
             
             img.save(filename= dir_path+exportName+".tif")
     
+    # Takes in Red, Green, Blue bands and creates an RGB image
     @staticmethod
     def RGBCompose(fileName_R: str, fileName_G: str, fileName_B: str, exportName: str) -> None:
         dir_path = Util.GetDataDirectory()
@@ -29,7 +32,10 @@ class Processes:
             img.read(filename=fileName_B)
             img.combine(colorspace="rgb")
             img.save(filename = dir_path+exportName+".tif")
-        
+    
+    # TODO: This doesn't work and is only for testing right now
+    # Reads byte by byte in the QA State to generate a "Good/Bad" data mask
+    # More information can be found here: https://modis-land.gsfc.nasa.gov/pdf/MOD09_UserGuide_v1.4.pdf
     @staticmethod
     def GenerateDataMask(fileName: str, exportName: str) -> None:
         dir_path = Util.GetDataDirectory()
@@ -139,7 +145,9 @@ class Processes:
             # data.negate()
             data.save(filename=dir_path+exportName+".tif")
     
-    
+    # TODO: This doesn't work nearly as well as it should
+    # Reads byte by byte in the CMG Internal Data file to isolate the sunglint mask
+    # More information can be found here: https://modis-land.gsfc.nasa.gov/pdf/MOD09_UserGuide_v1.4.pdf
     @staticmethod
     def GenerateSunGlintMask(fileName: str, exportName: str) -> None:
         dir_path = Util.GetDataDirectory()
@@ -182,7 +190,7 @@ class Processes:
             data.negate()
             data.save(filename=dir_path+exportName+".tif")
             
-    
+    # Reads RGB data and generates a mask that isolates pure black pixels in the image
     @staticmethod
     def GenerateNoDataMask(fileName: str, exportName: str) -> None:
         dir_path = Util.GetDataDirectory()
@@ -201,6 +209,8 @@ class Processes:
             data.import_pixels(0,0,data.width,data.height,"I","short",Mask)
             data.save(filename=dir_path+exportName+".tif")
             
+            
+    # Combines two masks together
     @staticmethod
     def CombineMasks(fileName1: str, fileName2: str, exportName: str) -> None:
         dir_path = Util.GetDataDirectory()
@@ -216,7 +226,7 @@ class Processes:
     
     
     
-    
+    # Applies a mask to a given image.
     @staticmethod
     def ApplyMask(fileName: str, maskName: str, exportName: str) -> None:
         dir_path = Util.GetDataDirectory()

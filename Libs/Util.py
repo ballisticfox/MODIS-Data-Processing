@@ -1,10 +1,13 @@
 import os
 
 class Util:
+    
+    # Clears the console
     @staticmethod
     def clearConsole() -> None:
         os.system('cls')
 
+    # Returns the directory to ./MODIS/Data
     @staticmethod
     def GetDataDirectory() -> str:
         # Find where we are
@@ -19,7 +22,7 @@ class Util:
         
         return data_path
     
-    # Convert to unix line endings
+    # Convert windows to unix line endings
     @staticmethod
     def correctLineEndings(fileName: str) -> None:
         WINDOWS_LINE_ENDING = b'\r\n'

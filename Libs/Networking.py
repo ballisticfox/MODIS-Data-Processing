@@ -1,13 +1,13 @@
 import requests
 import sys
-from Tile import *
-from Util import *
+from Libs.Tile import *
+from Libs.Util import *
 
 class Networking:
     
     # Parses CSVs downloaded from: https://ladsweb.modaps.eosdis.nasa.gov/search/
     @staticmethod
-    def ProcessCSV(fileName: str):
+    def ProcessCSV(fileName: str) -> list[Tile]:
         dir_path = Util.GetDataDirectory()
         
         rawData = []
@@ -36,14 +36,14 @@ class Networking:
         fullURL: str = prefix + tile.url
         packageSize: int = 0
         
-        print("Downloading: " + tile.name)
+        print("Downloading: " + tile.gridCoord)
         
         with requests.get(fullURL, stream=True, headers={'Authorization': 'Bearer ' + token}) as r:
             r.raise_for_status()
             print(r.url)
             print(r.status_code)
 
-            with open(dir_path+tile.filename, 'wb') as f:
+            with open(dir_path+tile.fileName, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):
                         f.write(chunk)
                         packageSize += 8192
