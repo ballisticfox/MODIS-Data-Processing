@@ -3,6 +3,7 @@
 *.met
 *.hdf
 *.heg
+*.csv
 Token.py
 
 # Byte-compiled / optimized / DLL files
