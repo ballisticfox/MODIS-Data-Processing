@@ -1,16 +1,20 @@
 import requests
 import sys
 from Tile import *
+from Util import *
 
 class Networking:
     
     # Parses CSVs downloaded from: https://ladsweb.modaps.eosdis.nasa.gov/search/
     @staticmethod
     def ProcessCSV(fileName: str):
+        dir_path = Util.GetDataDirectory()
+        
         rawData = []
         tileList = []
         
-        with open(fileName, 'r') as csv:
+        
+        with open(dir_path+fileName, 'r') as csv:
             for line in csv:
                 rawData.append(line)
         
@@ -26,6 +30,8 @@ class Networking:
     # Takes in a tile and downloads it from the URL, you must generate a token using your EarthData Login
     @staticmethod
     def downloadURL(tile: Tile, token: str) -> None:
+        dir_path = Util.GetDataDirectory()
+        
         prefix: str = "https://ladsweb.modaps.eosdis.nasa.gov"
         fullURL: str = prefix + tile.url
         packageSize: int = 0
@@ -37,7 +43,7 @@ class Networking:
             print(r.url)
             print(r.status_code)
 
-            with open(tile.filename, 'wb') as f:
+            with open(dir_path+tile.filename, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):
                         f.write(chunk)
                         packageSize += 8192
