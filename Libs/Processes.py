@@ -1,4 +1,5 @@
 from wand.image import Image
+import time
 from Libs.Util import *
 
 class Processes:
@@ -40,41 +41,74 @@ class Processes:
             rawDataDump = []
             print("Converting to binary")
             for value in dataDump:
-                rawDataDump.append("0"*(16-len(str(bin(value))[2:]))+str(bin(value))[2:])
+                rawDataDump.append(("0"*(16-len(str(bin(value))[2:]))+str(bin(value))[2:])[::-1])
             
             print("Correcting mask")
             rawCorrectedMask = []
             # index = 0
             for value in rawDataDump:
-                GoodData = True
+                # GoodData = True
                 
                 # Cloud State
-                # 00 - Clear
-                # 01 - Cloudy
-                # 10 - Mixed
-                # 11 - Not Set, Assumed Clear
+                # 00 - Clear                    | 00
+                # 01 - Cloudy                   | 10
+                # 10 - Mixed                    | 01
+                # 11 - Not Set, Assumed Clear   | 11
+                # print(value)
                 # print(f"{index % data.width}, {math.floor(index/data.width)}: {value}")
                 # index += 1
-                if value[-2:] == "01" or value[-2:] == "10" or value[-2:] == "11":
-                    GoodData = False
+                # print(value)
+                # if value[0:] == "01" or value[-2:] == "10":
+                #     GoodData = False
+                #
+                # 0000000000000000
+                # 1111111111111111
+                # 0100000000000000
+                # 1100000000000000
+                
+                if value[6:8][::-1] == "00":
+                    rawCorrectedMask.append("0000000000000000")
+
+                if value[6:8][::-1] == "01":
+                    rawCorrectedMask.append("0100000000000000")
+                    
+                if value[6:8][::-1] == "10":
+                    rawCorrectedMask.append("1100000000000000")
+                    
+                if value[6:8][::-1] == "11":
+                    rawCorrectedMask.append("1111111111111111")
                 
                 # Cloud Shadow
                 # 1 - Yes
                 # 0 - No
-                if value[-3:-2] == "1":
-                    GoodData = False
+                # if value[10:11] == "0":
+                #     rawCorrectedMask.append("0000000000000000")
+                # else:
+                #     rawCorrectedMask.append("1111111111111111")
+
                     
                 #Land/Water Flag
                 # if value[-6:-3] == 1:
                 #     GoodData = False
                 
                 # Aersol Quantity
-                if value[-6:-3] == "11":
-                    GoodData = False
+                # if value[-8:-6] == "00":
+                #     rawCorrectedMask.append("0000000000000000")
+                    
+                # if value[-8:-6] == "10":
+                #     rawCorrectedMask.append("1111111111111111")
+                    
+                # if value[-8:-6] == "01":
+                #     rawCorrectedMask.append("0100000000000000")
+                    
+                # if value[-8:-6] == "11":
+                #     rawCorrectedMask.append("1100000000000000")
+                    
                 
-                #Cirrus Detected
-                if value[-8:-6] == "11":
-                    GoodData = False
+                
+                # #Cirrus Detected
+                # if value[-8:-6] == "11":
+                #     GoodData = False
                 
                 
                 # print(value)
@@ -87,10 +121,10 @@ class Processes:
                 # if value[10:11] == '1':
                 #     GoodData = False
                     
-                if GoodData == True:
-                    rawCorrectedMask.append("0000000000000000")
-                else:
-                    rawCorrectedMask.append("1111111111111111")
+                # if GoodData == True:
+                    # rawCorrectedMask.append("0000000000000000")
+                # else:
+                #     rawCorrectedMask.append("1111111111111111")
                 
             
             print("Converting mask to integer")
@@ -103,7 +137,6 @@ class Processes:
             
             print("Exporting Image")
             # data.negate()
-            data.negate()
             data.save(filename=dir_path+exportName+".tif")
     
     
@@ -196,3 +229,4 @@ class Processes:
                 img.composite(mask, operator="copy_alpha")
             
             img.save(filename=dir_path+exportName+".tif")
+            

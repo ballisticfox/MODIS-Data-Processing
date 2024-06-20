@@ -5,7 +5,7 @@ class HEG:
 
     # Generate grid data file that HEGTool can use to process HDFs into GeoTiffs
     @staticmethod
-    def GenerateGrid(GRID_NAME: str, INPUT_FILENAME: str, OBJECT_NAME: str, FIELD_NAME: str, BAND_NUMBER:int, OUTPUT_FILENAME: str) -> None:
+    def GenerateGrid(GRID_NAME: str, INPUT_FILENAME: str, OBJECT_NAME: str, FIELD_NAME: str, BAND_NUMBER:int, OUTPUT_PIXEL_SIZE: float, OUTPUT_FILENAME: str) -> None:
         
         # Get Data Directory
         filePath = Util.GetDataDirectory()
@@ -28,7 +28,7 @@ class HEG:
         grid.append(f"OUTPUT_PROJECTION_TYPE = GEO\n")
         grid.append(f"ELLIPSOID_CODE = WGS84\n")
         grid.append(f"OUTPUT_PROJECTION_PARAMETERS = ( 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0  )\n")
-        grid.append(f"OUTPUT_PIXEL_SIZE = 180.0\n")
+        grid.append(f"OUTPUT_PIXEL_SIZE = {OUTPUT_PIXEL_SIZE}\n")
         grid.append(f"OUTPUT_FILENAME = {filePath+OUTPUT_FILENAME+outputFileExtension}\n")
         grid.append(f"OUTPUT_TYPE = GEO\n")
         grid.append(f"END\n\n\n")
